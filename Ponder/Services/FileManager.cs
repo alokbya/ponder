@@ -40,6 +40,7 @@ namespace Ponder.Services
         public void CreateNewDalie(string dailieName)
         {
             InitializeDirectories();
+            dailieName = ValidateDalieName(dailieName);
             
             var newDailiePath = Path.Combine(_settings.Value.DalieFolder, dailieName + ".md");
             
@@ -49,8 +50,6 @@ namespace Ponder.Services
                 _logger.LogInformation("Dailie {DailieName} already exists", dailieName);
                 return;
             }
-            
-            ValidateDalieName(dailieName);
             
             File.Copy(_settings.Value.DefaultTemplatePath, newDailiePath);
             InitializeNewDay(dailieName, newDailiePath);
@@ -70,13 +69,13 @@ namespace Ponder.Services
             File.WriteAllText(dailiePath, template);
         }
         
-        private void ValidateDalieName(string dalieName)
+        private string ValidateDalieName(string dalieName)
         {
             if (Regex.IsMatch(dalieName, @"^\d{2}-\d{2}-\d{2}$"))
-                return;
+                return dalieName;
         
             if (dalieName.Trim() == "today")
-                return;
+                return DateTime.Now.ToString("dd-MM-yy");
 
             throw new ArgumentException("Invalid date format. Please use 'dd-MM-yy' or 'today'.");
         }
